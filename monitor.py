@@ -40,11 +40,11 @@ def send_log_to_channel():
         return
     try:
         ukraine_time = get_ukraine_time()
-        log_text = "📊 <b>ЛОГ ВИКОНАННЯ СКРИПТА</b>\n\n"
+        log_text = "📊 <b>SCRIPT EXECUTION LOG</b>\n\n"
         log_text += "<pre>"
         log_text += "\n".join(log_messages)
         log_text += "</pre>"
-        log_text += f"\n\n⏰ Завершено: {get_ukraine_time().strftime('%d.%m.%Y %H:%M:%S')} (Київський час)"
+        log_text += f"\n\n⏰ Completed: {get_ukraine_time().strftime('%d.%m.%Y %H:%M:%S')} (Kyiv time)"
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         data = {
             'chat_id': TELEGRAM_LOG_CHANNEL_ID,
@@ -53,11 +53,11 @@ def send_log_to_channel():
         }
         response = requests.post(url, data=data, timeout=10)
         if response.status_code == 200:
-            print("✅ Лог відправлено у лог-канал")
+            print("✅ Log sent to log channel")
         else:
-            print(f"❌ Помилка відправки логу: {response.text}")
+            print(f"❌ Error sending log: {response.text}")
     except Exception as e:
-        print(f"❌ Помилка відправки логу: {e}")
+        print(f"❌ Error sending log: {e}")
 
 def get_schedule_content():
     try:
@@ -77,23 +77,23 @@ def get_schedule_content():
                 if 'УВАГА' in text and 'ІНФОРМАЦІЯ' in text and important_message is None:
                     lines = [line.strip() for line in text.split('\n') if line.strip()]
                     important_message = '\n'.join(lines)
-                    log(f"✅ Знайдено повідомлення УВАГА: {important_message[:100]}...")
+                    log(f"✅ Message found УВАГА: {important_message[:100]}...")
                 if 'Дата' in text and update_date is None:
                     lines = [line.strip() for line in text.split('\n') if line.strip()]
                     update_date = '\n'.join(lines)
-                    log(f"✅ Знайдено дату оновлення: {update_date}")
+                    log(f"✅ Update date found: {update_date}")
             if not important_message:
-                log("⚠️ Повідомлення УВАГА не знайдено")
+                log("⚠️УВАГА message not found")
             if not update_date:
-                log("⚠️ Дата оновлення не знайдена")
+                log("⚠️ Update date not found")
             return important_message, update_date
     except Exception as e:
-        log(f"❌ Помилка Playwright: {e}")
+        log(f"❌ Error Playwright: {e}")
         return None, None
 
 def take_screenshot_between_elements():
     try:
-        log("📸 Створюю скріншот проміжку між елементами...")
+        log("📸 I'm taking a screenshot of the gap between elements...")
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page(viewport={'width': 1920, 'height': 3080})
@@ -101,15 +101,15 @@ def take_screenshot_between_elements():
             date_element = page.locator("text=/Дата оновлення інформації/").first
             end_element = page.locator("text=/робіт/").last
             if date_element.count() == 0:
-                log("❌ Не знайдено елемент 'Дата оновлення інформації'")
+                log("❌ Element 'Дата оновлення інформації' not found")
                 browser.close()
                 return None, None
             if end_element.count() == 0:
-                log("⚠️ Не знайдено слово 'робіт', буде використано висоту всієї сторінки!")
+                log("⚠️ The word 'робіт' was not found, the entire page height will be used!")
             date_box = date_element.bounding_box()
             end_box = end_element.bounding_box() if end_element.count() > 0 else None
             if not date_box:
-                log("❌ Не вдалося отримати координати 'Дата оновлення інформації'")
+                log("❌ Failed to get coordinates 'Дата оновлення інформації'")
                 browser.close()
                 return None, None
             x = 0
@@ -120,21 +120,21 @@ def take_screenshot_between_elements():
             image = Image.open(BytesIO(full_screenshot))
             if end_box:
                 end_y = end_box['y'] + end_box['height'] + 5
-                log(f"📐 Обрізка до слова 'робіт': y={start_y}-{end_y}")
+                log(f"📐 Trimming to the word 'робіт': y={start_y}-{end_y}")
             else:
                 end_y = image.height
-                log("📐 Обрізка на всю висоту сторінки (робіт не знайдено)")
+                log("📐 Crop to full page height (робіт no found)")
             height = end_y - start_y
             if height <= 0:
-                log("❌ Некоректна висота області для скріншота")
+                log("❌ Incorrect height of the screenshot area")
                 return None, None
             cropped_image = image.crop((x, start_y, x + width, end_y))
             cropped_image.save('screenshot.png')
             screenshot_hash = hashlib.md5(cropped_image.tobytes()).hexdigest()
-            log(f"✅ Скріншот створено. Хеш: {screenshot_hash}")
+            log(f"✅ Screenshot created. Hash: {screenshot_hash}")
             return 'screenshot.png', screenshot_hash
     except Exception as e:
-        log(f"❌ Помилка створення скріншоту: {e}")
+        log(f"❌ Screenshot creation error: {e}")
         return None, None
 
 def get_last_data():
@@ -143,7 +143,7 @@ def get_last_data():
             data = json.load(f)
             return data
     except:
-        log("⚠️ last_hash.json не знайдено (перший запуск)")
+        log("⚠️ last_hash.json not found (first run)")
         return None
 
 def save_data(message_content, date_content, screenshot_hash):
@@ -156,23 +156,23 @@ def save_data(message_content, date_content, screenshot_hash):
             'screenshot_hash': screenshot_hash,
             'timestamp': datetime.now().isoformat()
         }, f, indent=2, ensure_ascii=False)
-    log(f"💾 Дані збережено. Хеш повідомлення: {hash_message}, Хеш скріншота: {screenshot_hash}")
+    log(f"💾 Data saved. Message hash: {hash_message}, Хеш скріншота: {screenshot_hash}")
 
 def send_to_channel(message_content, date_content, screenshot_path=None):
     try:
         if screenshot_path and os.path.exists(screenshot_path):
             photo_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
-            full_message = f"🔔 ОНОВЛЕННЯ ГРАФІКА ВІДКЛЮЧЕНЬ\n\n"
+            full_message = f"🔔 UPDATES\n\n"
             full_message += message_content
-            full_message += f'\n\n<a href="{URL}">🔗 Переглянути графік на сайті </a>\n\n'
+            full_message += f'\n\n<a href="{URL}">🔗 View on the website </a>\n\n'
             
             if date_content:
                 full_message += f"{date_content}"
             
             if SUBSCRIBE:
-                full_message += f'\n\n<a href="{SUBSCRIBE}">⚡ ПІДПИСАТИСЯ ⚡</a>'
+                full_message += f'\n\n<a href="{SUBSCRIBE}">⚡ SUBSCRIBE ⚡</a>'
             else:
-                log("⚠️ SUBSCRIBE не встановлено в змінних оточення!")
+                log("⚠️ SUBSCRIBE is not set in environment variables!")
             
             with open(screenshot_path, 'rb') as photo:
                 files = {'photo': photo}
@@ -183,47 +183,47 @@ def send_to_channel(message_content, date_content, screenshot_path=None):
                 }
                 response = requests.post(photo_url, files=files, data=data, timeout=30)
                 if response.status_code == 200:
-                    log("✅ Повідомлення відправлено у канал")
+                    log("✅ Message sent to the channel")
                     return True
                 else:
-                    log(f"❌ Помилка відправки: {response.text}")
+                    log(f"❌ Sending error: {response.text}")
                     return False
         else:
-            log("⚠️ Скріншот не знайдено")
+            log("⚠️ Screenshot not found")
             return False
     except Exception as e:
-        log(f"❌ Помилка відправки: {e}")
+        log(f"❌ Sending error: {e}")
         return False
 
 def main():
     log("=" * 50)
-    log("🔍 МОНІТОРИНГ ГРАФІКА ВІДКЛЮЧЕНЬ")
+    log("🔍 MONITORING")
     log("=" * 50)
     try:
         message_content, date_content = get_schedule_content()
         if not message_content:
-            log("❌ Не вдалося отримати важливе повідомлення")
+            log("❌ Failed to receive important message")
             return
         screenshot_path, screenshot_hash = take_screenshot_between_elements()
         if not screenshot_path or not screenshot_hash:
-            log("❌ Не вдалося створити скріншот або отримати його хеш")
+            log("❌ Failed to create a screenshot or get its hash")
             return
         last_data = get_last_data()
         last_screenshot_hash = last_data.get('screenshot_hash') if last_data else None
-        log(f"🔑 Поточний хеш скріншота: {screenshot_hash}")
-        log(f"🔑 Попередній хеш скріншота: {last_screenshot_hash}")
+        log(f"🔑 Current screenshot hash: {screenshot_hash}")
+        log(f"🔑 Previous screenshot hash: {last_screenshot_hash}")
         if last_screenshot_hash == screenshot_hash:
-            log("✅ Змін у ТАБЛИЦІ ГРАФІКУ немає. Завершення.")
+            log("✅ There are no changes. Completion.")
             save_data(message_content, date_content, screenshot_hash)
             return
-        log("🔔 ВИЯВЛЕНІ ЗМІНИ У ТАБЛИЦІ ГРАФІКУ!")
+        log("🔔 CHANGES IDENTIFIED!")
         if send_to_channel(message_content, date_content, screenshot_path):
             save_data(message_content, date_content, screenshot_hash)
-            log("✅ Успішно! Оновлення відправлено")
+            log("✅ Successful! Update sent")
         else:
-            log("❌ Не вдалося відправити оновлення")
+            log("❌ Failed to send update")
     except Exception as e:
-        log(f"❌ Критична помилка: {e}")
+        log(f"❌ Critical error: {e}")
     finally:
         send_log_to_channel()
 
