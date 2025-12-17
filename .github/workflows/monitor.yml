@@ -2,8 +2,8 @@ name: Monitor Schedule Updates
 
 on:
   schedule:
-    #- cron: '*/5 * * * *'  # Кожні 5 хвилин
-  workflow_dispatch:  # Можна запускати вручну
+    #- cron: '*/5 * * * *'  # runs every 5 minutes
+  workflow_dispatch:  # Can be started manually
 
 jobs:
   monitor:
