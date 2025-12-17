@@ -75,13 +75,14 @@ Create the following secrets in your repository (`Settings` → `Secrets and var
 
   
 ### 2. Local Run (Optional)
+```bash
 python -m venv venv
-source venv/bin/activate # or venv\Scripts\activate on Windows
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 playwright install chromium
 python monitor.py
 
-
+```
 For local runs, environment variables (`URL`, Telegram tokens, etc.) can be passed via `.env` file or export/set in terminal.
 
 ## License
