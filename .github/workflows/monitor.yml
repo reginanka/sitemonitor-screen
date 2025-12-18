@@ -1,7 +1,7 @@
 name: Monitor Schedule Updates
 
 on:
-  # schedule:
+  schedule:
     #- cron: '*/5 * * * *'  # runs every 5 minutes
   workflow_dispatch:  # Can be started manually
 
